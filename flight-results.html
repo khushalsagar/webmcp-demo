@@ -417,11 +417,20 @@
             return `${displayHour}:${minute} ${ampm}`;
         }
 
-        // Generate flight duration
-        function generateDuration() {
-            const hours = Math.floor(Math.random() * 8) + 2;
+        // Generate flight duration based on stops
+        function generateDuration(stops) {
+            let baseHours;
+            
+            if (stops === 'Non-stop') {
+                baseHours = Math.floor(Math.random() * 3) + 2; // 2-4 hours
+            } else if (stops === '1 stop') {
+                baseHours = Math.floor(Math.random() * 4) + 4; // 4-7 hours
+            } else { // 2 stops
+                baseHours = Math.floor(Math.random() * 5) + 7; // 7-11 hours
+            }
+            
             const minutes = Math.random() < 0.5 ? 0 : 30;
-            return `${hours}h ${minutes > 0 ? minutes + 'm' : ''}`.trim();
+            return `${baseHours}h ${minutes > 0 ? minutes + 'm' : ''}`.trim();
         }
 
         // Generate random stops
@@ -454,6 +463,8 @@
                 const hasEntertainment = Math.random() < 0.8;
                 const hasCharging = Math.random() < 0.6;
                 const hasLieFlatUpgrade = Math.random() < 0.4;
+                const stops = generateStops();
+                const duration = generateDuration(stops);
                 
                 flights.push({
                     airline: airline.name,
@@ -461,8 +472,8 @@
                     flightNumber: `${airline.code}${flightNumber}`,
                     departureTime: randomTime(),
                     arrivalTime: randomTime(),
-                    duration: generateDuration(),
-                    stops: generateStops(),
+                    duration: duration,
+                    stops: stops,
                     price: pricePerPerson,
                     cabin: Math.random() < 0.3 ? 'Business' : 'Economy',
                     aircraft: aircraft,
