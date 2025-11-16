@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Booking</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .date-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin-right: 8px;
+        }
+
+        .checkbox-group label {
+            margin-bottom: 0;
+            font-weight: normal;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✈️ Book Your Flight</h1>
+        <p class="subtitle">Find the best flights for your journey</p>
+
+        <form id="flightForm">
+            <div class="form-group">
+                <label for="origin">Origin City</label>
+                <input type="text" id="origin" name="origin" placeholder="e.g., New York" required>
+            </div>
+
+            <div class="form-group">
+                <label for="destination">Destination City</label>
+                <input type="text" id="destination" name="destination" placeholder="e.g., London" required>
+            </div>
+
+            <div class="date-group">
+                <div class="form-group">
+                    <label for="departureDate">Departure Date</label>
+                    <input type="date" id="departureDate" name="departureDate" required>
+                </div>
+
+                <div class="form-group" id="returnDateGroup">
+                    <label for="returnDate">Return Date</label>
+                    <input type="date" id="returnDate" name="returnDate">
+                </div>
+            </div>
+
+            <div class="checkbox-group">
+                <input type="checkbox" id="oneWay" name="oneWay">
+                <label for="oneWay">One-way trip</label>
+            </div>
+
+            <div class="form-group">
+                <label for="passengers">Number of Passengers</label>
+                <input type="number" id="passengers" name="passengers" min="1" max="9" value="1" required>
+            </div>
+
+            <button type="submit">Search Flights</button>
+        </form>
+    </div>
+
+    <script>
+        const form = document.getElementById('flightForm');
+        const oneWayCheckbox = document.getElementById('oneWay');
+        const returnDateGroup = document.getElementById('returnDateGroup');
+        const returnDateInput = document.getElementById('returnDate');
+        const departureDateInput = document.getElementById('departureDate');
+
+        // Set minimum date to today
+        const today = new Date().toISOString().split('T')[0];
+        departureDateInput.min = today;
+        returnDateInput.min = today;
+
+        // Handle one-way checkbox
+        oneWayCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                returnDateGroup.classList.add('hidden');
+                returnDateInput.removeAttribute('required');
+                returnDateInput.value = '';
+            } else {
+                returnDateGroup.classList.remove('hidden');
+            }
+        });
+
+        // Update return date minimum when departure date changes
+        departureDateInput.addEventListener('change', function() {
+            returnDateInput.min = this.value;
+            if (returnDateInput.value && returnDateInput.value < this.value) {
+                returnDateInput.value = '';
+            }
+        });
+
+        // Handle form submission
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                origin: document.getElementById('origin').value,
+                destination: document.getElementById('destination').value,
+                departureDate: departureDateInput.value,
+                returnDate: oneWayCheckbox.checked ? '' : returnDateInput.value,
+                passengers: document.getElementById('passengers').value,
+                tripType: oneWayCheckbox.checked ? 'one-way' : 'round-trip'
+            };
+
+            // Build URL with query parameters
+            const params = new URLSearchParams();
+            params.append('origin', formData.origin);
+            params.append('destination', formData.destination);
+            params.append('departureDate', formData.departureDate);
+            if (formData.returnDate) {
+                params.append('returnDate', formData.returnDate);
+            }
+            params.append('passengers', formData.passengers);
+            params.append('tripType', formData.tripType);
+
+            // Navigate to results page
+            window.location.href = `flight-results.html?${params.toString()}`;
+        });
+    </script>
+</body>
+</html>
