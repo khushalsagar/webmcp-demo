@@ -486,11 +486,19 @@
             filteredFlights = [...allFlights]; // Initialize filtered flights
             currentPage = 0;
 
+            const dateOptions = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                timeZone: 'UTC'
+            };
+
             // Update summary
             const summaryHtml = `
                 <h2>${searchData.origin} → ${searchData.destination}</h2>
-                <p>${new Date(searchData.departureDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-                ${searchData.returnDate ? ' - ' + new Date(searchData.returnDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : ' (One-way)'}
+                <p>${new Date(searchData.departureDate).toLocaleDateString('en-US', dateOptions)}
+                ${searchData.returnDate ? ' - ' + new Date(searchData.returnDate).toLocaleDateString('en-US', dateOptions) : ' (One-way)'}
                 • ${searchData.passengers} passenger${searchData.passengers > 1 ? 's' : ''}</p>
             `;
             document.getElementById('searchSummary').innerHTML = summaryHtml;
