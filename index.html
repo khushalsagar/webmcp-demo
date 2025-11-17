@@ -454,6 +454,7 @@
 
         // Search flights function
         async function searchFlights({ origin, destination, departureDate, returnDate, passengers }) {
+            console.log('running searchFlights');
             // Fill in the form
             document.getElementById('origin').value = origin;
             document.getElementById('destination').value = destination;
@@ -533,6 +534,7 @@
 
         // Get flights function - returns currently shown or all flights
         async function getFlights({ scope = "visible" }) {
+            console.log('running getFlights');
             let flightsToReturn;
             
             if (scope === "visible") {
@@ -579,6 +581,8 @@
 
         // Show specific flights by ID
         async function showFlights({ flightIds }) {
+            console.log('running showFlights');
+            
             // Filter flights by the provided IDs
             filteredFlights = allFlights.filter(flight => flightIds.includes(flight.flightId));
             
@@ -597,6 +601,8 @@
 
         // Reset filters to show all flights
         async function resetFilters() {
+            console.log('running resetFilters');
+            
             filteredFlights = [...allFlights];
             currentPage = 0;
             
