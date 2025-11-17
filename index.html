@@ -634,7 +634,7 @@
                     tools: [
                         {
                             execute: getFlights,
-                            name: "get-flights",
+                            name: "get_flights",
                             description: "Get the list of flights. Can return either currently visible flights on the page or all search results.",
                             inputSchema: {
                                 type: "object",
@@ -650,7 +650,7 @@
                         },
                         {
                             execute: showFlights,
-                            name: "show-flights",
+                            name: "show_flights",
                             description: "Filter and display only specific flights by their IDs. Updates the UI to show only the selected flights.",
                             inputSchema: {
                                 type: "object",
@@ -666,7 +666,7 @@
                         },
                         {
                             execute: resetFilters,
-                            name: "reset-filters",
+                            name: "reset_filters",
                             description: "Remove all filters and show all flights from the original search results.",
                             inputSchema: {
                                 type: "object",
@@ -681,7 +681,7 @@
                     tools: [
                         {
                             execute: searchFlights,
-                            name: "search-flights",
+                            name: "search_flights",
                             description: "Search for available flights between cities. Returns detailed flight information including airline, price, times, stops, duration, aircraft type, amenities, and seat details.",
                             inputSchema: {
                                 type: "object",
