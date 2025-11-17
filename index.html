@@ -367,7 +367,6 @@
     </style>
 </head>
 <body>
-    <!-- Search Form Page -->
     <div class="container" id="searchPage">
         <h1>✈️ Book Your Flight</h1>
         <p class="subtitle">Find the best flights for your journey</p>
@@ -416,7 +415,6 @@
         </form>
     </div>
 
-    <!-- Results Page -->
     <div class="container results-container hidden" id="resultsPage">
         <button class="back-button" id="backButton">← Back to Search</button>
         
@@ -511,8 +509,8 @@
             renderFlights();
             updateModelContext(); // Update context for results page
 
-            // Return flight details as JSON
-            return {
+            // Return flight details as STRINGIFIED JSON
+            return JSON.stringify({
                 totalFlights: allFlights.length,
                 flights: allFlights.map(flight => ({
                     flightId: flight.flightId,
@@ -537,7 +535,7 @@
                         lieFlatUpgrade: flight.lieFlat
                     }
                 }))
-            };
+            });
         }
 
         // Get flights function - returns currently shown or all flights
@@ -557,7 +555,7 @@
                 throw new Error("Invalid scope. Use 'visible' or 'all'");
             }
 
-            return {
+            return JSON.stringify({
                 scope: scope,
                 totalFlights: filteredFlights.length,
                 returnedFlights: flightsToReturn.length,
@@ -584,7 +582,7 @@
                         lieFlatUpgrade: flight.lieFlat
                     }
                 }))
-            };
+            });
         }
 
         // Show specific flights by ID
@@ -601,10 +599,10 @@
             document.getElementById('resultsCount').textContent = `${filteredFlights.length} flights found`;
             renderFlights();
 
-            return {
+            return JSON.stringify({
                 displayedFlights: filteredFlights.length,
                 flightIds: filteredFlights.map(f => f.flightId)
-            };
+            });
         }
 
         // Reset filters to show all flights
@@ -618,10 +616,10 @@
             document.getElementById('resultsCount').textContent = `${allFlights.length} flights found`;
             renderFlights();
 
-            return {
+            return JSON.stringify({
                 totalFlights: allFlights.length,
                 message: "All filters reset. Showing all flights."
-            };
+            });
         }
 
         // Expose to window for debugging
