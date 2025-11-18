@@ -634,6 +634,39 @@
 
             const isResultsPage = !document.getElementById('resultsPage').classList.contains('hidden');
 
+            // Define search tool to be used in both contexts
+            const searchTool = {
+                execute: searchFlights,
+                name: "search_flights",
+                description: "Search for available flights between cities. Returns detailed flight information including airline, price, times, stops, duration, aircraft type, amenities, and seat details.",
+                inputSchema: {
+                    type: "object",
+                    properties: {
+                        origin: { 
+                            type: "string", 
+                            description: "The origin city for the flight" 
+                        },
+                        destination: { 
+                            type: "string", 
+                            description: "The destination city for the flight" 
+                        },
+                        departureDate: { 
+                            type: "string", 
+                            description: "The departure date in YYYY-MM-DD format" 
+                        },
+                        returnDate: { 
+                            type: "string", 
+                            description: "The return date in YYYY-MM-DD format. Only required for round-trip flights. Omit for one-way trips." 
+                        },
+                        passengers: { 
+                            type: "number", 
+                            description: "The number of passengers (1-8)" 
+                        }
+                    },
+                    required: ["origin", "destination", "departureDate", "passengers"]
+                }
+            };
+
             if (isResultsPage) {
                 // Results page tools
                 window.navigator.modelContext.provideContext({
@@ -678,44 +711,16 @@
                                 type: "object",
                                 properties: {}
                             }
-                        }
+                        },
+                        // search_flights tool added to results page context
+                        searchTool
                     ]
                 });
             } else {
                 // Search page tool
                 window.navigator.modelContext.provideContext({
                     tools: [
-                        {
-                            execute: searchFlights,
-                            name: "search_flights",
-                            description: "Search for available flights between cities. Returns detailed flight information including airline, price, times, stops, duration, aircraft type, amenities, and seat details.",
-                            inputSchema: {
-                                type: "object",
-                                properties: {
-                                    origin: { 
-                                        type: "string", 
-                                        description: "The origin city for the flight" 
-                                    },
-                                    destination: { 
-                                        type: "string", 
-                                        description: "The destination city for the flight" 
-                                    },
-                                    departureDate: { 
-                                        type: "string", 
-                                        description: "The departure date in YYYY-MM-DD format" 
-                                    },
-                                    returnDate: { 
-                                        type: "string", 
-                                        description: "The return date in YYYY-MM-DD format. Only required for round-trip flights. Omit for one-way trips." 
-                                    },
-                                    passengers: { 
-                                        type: "number", 
-                                        description: "The number of passengers (1-8)" 
-                                    }
-                                },
-                                required: ["origin", "destination", "departureDate", "passengers"]
-                            }
-                        }
+                        searchTool
                     ]
                 });
             }
@@ -975,6 +980,7 @@
             document.getElementById('resultsPage').classList.remove('hidden');
 
             renderFlights();
+            updateModelContext(); // Ensure context updates when manually submitting form too
         });
     </script>
 </body>
