@@ -35,6 +35,30 @@
             max-width: 900px;
         }
 
+        /* Simulation Settings Style */
+        .simulation-settings {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+
+        .simulation-settings label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .simulation-settings input {
+            padding: 8px;
+            font-size: 14px;
+            border: 1px solid #ced4da;
+            margin-bottom: 0;
+        }
+
         h1 {
             color: #333;
             margin-bottom: 10px;
@@ -354,20 +378,18 @@
                 max-width: none;
             }
         }
-
-        @media (max-width: 600px) {
-            .row {
-                grid-template-columns: 1fr;
-            }
-
-            .container {
-                padding: 30px 20px;
-            }
-        }
     </style>
 </head>
 <body>
     <div class="container" id="searchPage">
+        
+        <div class="simulation-settings">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label for="latencyInput">Tool Execution Latency (ms)</label>
+                <input type="number" id="latencyInput" placeholder="0" min="0" step="100" value="0">
+            </div>
+        </div>
+        
         <h1>✈️ Book Your Flight</h1>
         <p class="subtitle">Find the best flights for your journey</p>
 
@@ -449,6 +471,25 @@
         let allFlights = [];
         let searchData = {};
         let filteredFlights = []; // Tracks currently filtered flights
+
+        // --- LATENCY SIMULATION LOGIC ---
+        let toolExecutionLatency = 0;
+
+        document.getElementById('latencyInput').addEventListener('input', (e) => {
+            const val = parseInt(e.target.value);
+            toolExecutionLatency = isNaN(val) ? 0 : val;
+            console.log(`Tool latency set to ${toolExecutionLatency}ms`);
+        });
+
+        // Wrapper function to add delay
+        const withLatency = (fn) => async (...args) => {
+            if (toolExecutionLatency > 0) {
+                console.log(`Simulating tool latency: ${toolExecutionLatency}ms...`);
+                await new Promise(resolve => setTimeout(resolve, toolExecutionLatency));
+            }
+            return fn(...args);
+        };
+        // --------------------------------
 
         // Search flights function
         async function searchFlights({ origin, destination, departureDate, returnDate, passengers }) {
@@ -635,8 +676,9 @@
             const isResultsPage = !document.getElementById('resultsPage').classList.contains('hidden');
 
             // Define search tool to be used in both contexts
+            // NOTE: Wrapped withLatency() here
             const searchTool = {
-                execute: searchFlights,
+                execute: withLatency(searchFlights),
                 name: "search_flights",
                 description: "Search for available flights between cities. Returns detailed flight information including airline, price, times, stops, duration, aircraft type, amenities, and seat details.",
                 inputSchema: {
@@ -669,10 +711,11 @@
 
             if (isResultsPage) {
                 // Results page tools
+                // NOTE: Wrapped all execute functions withLatency() here
                 window.navigator.modelContext.provideContext({
                     tools: [
                         {
-                            execute: getFlights,
+                            execute: withLatency(getFlights),
                             name: "get_flights",
                             description: "Get the list of flights. Can return either currently visible flights on the page or all search results.",
                             inputSchema: {
@@ -688,7 +731,7 @@
                             }
                         },
                         {
-                            execute: showFlights,
+                            execute: withLatency(showFlights),
                             name: "show_flights",
                             description: "Filter and display only specific flights by their IDs. Updates the UI to show only the selected flights.",
                             inputSchema: {
@@ -704,7 +747,7 @@
                             }
                         },
                         {
-                            execute: resetFilters,
+                            execute: withLatency(resetFilters),
                             name: "reset_filters",
                             description: "Remove all filters and show all flights from the original search results.",
                             inputSchema: {
