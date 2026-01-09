@@ -218,7 +218,7 @@ window.searchFlights = searchFlights;
 window.getFlights = getFlights;
 window.showFlights = showFlights;
 window.resetFilters = resetFilters;
-window.include_search_flights_tool = window.include_search_flights_tool || true;
+window.include_search_flights_tool = window.include_search_flights_tool === undefined ? true : window.include_search_flights_tool;
 
 // Update model context based on current page
 function updateModelContext() {
