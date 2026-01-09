@@ -222,7 +222,10 @@ window.include_search_flights_tool = window.include_search_flights_tool || true;
 
 // Update model context based on current page
 function updateModelContext() {
-    if (!window.navigator.modelContext) return;
+    if (!window.navigator.modelContext) {
+      setTimeout(() => document.write('<h2>WebMCP is not enabled in this browser.<br>For Chrome, enable chrome://flags/#enable-experimental-web-platform-features.</h2>'),0);
+      return;
+    }
 
     const isResultsPage = !document.getElementById('resultsPage').classList.contains('hidden');
 
