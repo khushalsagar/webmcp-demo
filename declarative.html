@@ -34,17 +34,17 @@
                 amenities, and seat details.">
             <div class="form-group">
                 <label for="origin">Origin City</label>
-                <input type="text" id="origin" placeholder="e.g., New York" required>
+                <input type="text" id="origin" name="origin" placeholder="e.g., New York" required>
             </div>
 
             <div class="form-group">
                 <label for="destination">Destination City</label>
-                <input type="text" id="destination" placeholder="e.g., Los Angeles" required>
+                <input type="text" id="destination" name="destination" placeholder="e.g., Los Angeles" required>
             </div>
 
             <div class="form-group">
                 <label for="departureDate">Departure Date</label>
-                <input type="date" id="departureDate" required>
+                <input type="date" id="departureDate" name="departureDate" required>
             </div>
 
             <div class="checkbox-group">
@@ -54,12 +54,12 @@
 
             <div class="form-group" id="returnDateGroup">
                 <label for="returnDate">Return Date</label>
-                <input type="date" id="returnDate">
+                <input type="date" id="returnDate" name="returnDate">
             </div>
 
             <div class="form-group">
                 <label for="passengers">Number of Passengers</label>
-                <select id="passengers" required>
+                <select id="passengers" name="passengers" required>
                     <option value="1">1 Passenger</option>
                     <option value="2">2 Passengers</option>
                     <option value="3">3 Passengers</option>
