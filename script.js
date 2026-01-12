@@ -218,7 +218,7 @@ window.searchFlights = searchFlights;
 window.getFlights = getFlights;
 window.showFlights = showFlights;
 window.resetFilters = resetFilters;
-window.include_search_flights_tool = window.include_search_flights_tool === undefined ? true : window.include_search_flights_tool;
+window.is_declarative_tool = window.is_declarative_tool === undefined ? false : window.is_declarative_tool;
 
 // Update model context based on current page
 function updateModelContext() {
@@ -313,14 +313,14 @@ function updateModelContext() {
 
         // CONDITIONAL WORKAROUND:
         // Only add search_flights to the results page if the checkbox is checked
-        if (enableToolBugWorkaround && include_search_flights_tool) {
+        if (enableToolBugWorkaround && !is_declarative_tool) {
             toolsList.push(searchTool);
         }
 
         window.navigator.modelContext.provideContext({
             tools: toolsList
         });
-    } else if (include_search_flights_tool) {
+    } else if (!is_declarative_tool) {
         // Search page tool
         window.navigator.modelContext.provideContext({
             tools: [
@@ -538,51 +538,89 @@ document.getElementById('nextButton').addEventListener('click', () => {
 });
 
 document.getElementById('backButton').addEventListener('click', () => {
-    document.getElementById('resultsPage').classList.add('hidden');
-    document.getElementById('searchPage').classList.remove('hidden');
-    updateModelContext(); // Update context back to search page
+    history.back();
 });
 
 // Handle form submission
-document.getElementById('flightForm').addEventListener('submit', function(e) {
-    e.preventDefault();
+if (!is_declarative_tool) {
+    document.getElementById('flightForm').addEventListener('submit', function(e) {
+        e.preventDefault();
 
-    searchData = {
-        origin: document.getElementById('origin').value,
-        destination: document.getElementById('destination').value,
-        departureDate: document.getElementById('departureDate').value,
-        oneWay: document.getElementById('oneWay').checked,
-        returnDate: document.getElementById('oneWay').checked ? null : document.getElementById('returnDate').value,
-        passengers: document.getElementById('passengers').value
-    };
+        searchData = {
+            origin: document.getElementById('origin').value,
+            destination: document.getElementById('destination').value,
+            departureDate: document.getElementById('departureDate').value,
+            oneWay: document.getElementById('oneWay').checked,
+            returnDate: document.getElementById('oneWay').checked ? null : document.getElementById('returnDate').value,
+            passengers: document.getElementById('passengers').value
+        };
 
-    // Generate flights
-    allFlights = generateFlights(searchData.origin, searchData.destination);
-    filteredFlights = [...allFlights];
-    currentPage = 0;
+        // Generate flights
+        allFlights = generateFlights(searchData.origin, searchData.destination);
+        filteredFlights = [...allFlights];
+        currentPage = 0;
 
-    const dateOptions = { 
-        weekday: 'long', 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric', 
-        timeZone: 'UTC' 
-    };
+        const dateOptions = { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric', 
+            timeZone: 'UTC' 
+        };
 
-    // Update summary
-    const summaryHtml = `
-        <h2>${searchData.origin} → ${searchData.destination}</h2>
-        <p>${new Date(searchData.departureDate).toLocaleDateString('en-US', dateOptions)}
-        ${searchData.returnDate ? ' - ' + new Date(searchData.returnDate).toLocaleDateString('en-US', dateOptions) : ' (One-way)'}
-        • ${searchData.passengers} passenger${searchData.passengers > 1 ? 's' : ''}</p>
-    `;
-    document.getElementById('searchSummary').innerHTML = summaryHtml;
-    document.getElementById('resultsCount').textContent = `${allFlights.length} flights found`;
+        // Update summary
+        const summaryHtml = `
+            <h2>${searchData.origin} → ${searchData.destination}</h2>
+            <p>${new Date(searchData.departureDate).toLocaleDateString('en-US', dateOptions)}
+            ${searchData.returnDate ? ' - ' + new Date(searchData.returnDate).toLocaleDateString('en-US', dateOptions) : ' (One-way)'}
+            • ${searchData.passengers} passenger${searchData.passengers > 1 ? 's' : ''}</p>
+        `;
+        document.getElementById('searchSummary').innerHTML = summaryHtml;
+        document.getElementById('resultsCount').textContent = `${allFlights.length} flights found`;
 
-    // Show results page
-    document.getElementById('searchPage').classList.add('hidden');
-    document.getElementById('resultsPage').classList.remove('hidden');
+        // Show results page
+        document.getElementById('searchPage').classList.add('hidden');
+        document.getElementById('resultsPage').classList.remove('hidden');
+        
+        history.pushState({ page: 'results' }, '', '#results');
 
-    renderFlights();
-    updateModelContext(); // Ensure context updates when manually submitting form too
+        renderFlights();
+        updateModelContext(); // Ensure context updates when manually submitting form too
+    });
+}
+
+window.addEventListener('popstate', (event) => {
+    if (!is_declarative_tool) {
+        if (event.state && event.state.page === 'results') {
+             document.getElementById('searchPage').classList.add('hidden');
+             document.getElementById('resultsPage').classList.remove('hidden');
+        } else {
+             document.getElementById('resultsPage').classList.add('hidden');
+             document.getElementById('searchPage').classList.remove('hidden');
+        }
+        updateModelContext();
+    }
 });
+
+function handleUrlParams() {
+    if (!window.is_declarative_tool) return;
+
+    const params = new URLSearchParams(window.location.search);
+    if (!params.has('origin') || !params.has('destination')) return;
+
+    const origin = params.get('origin');
+    const destination = params.get('destination');
+    const departureDate = params.get('departureDate');
+    const returnDate = params.get('returnDate');
+    const passengers = params.get('passengers');
+
+    searchFlights({
+        origin,
+        destination,
+        departureDate,
+        returnDate,
+        passengers: parseInt(passengers)
+    });
+}
+
+handleUrlParams();
