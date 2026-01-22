@@ -218,7 +218,9 @@ window.searchFlights = searchFlights;
 window.getFlights = getFlights;
 window.showFlights = showFlights;
 window.resetFilters = resetFilters;
-window.is_declarative_tool = window.is_declarative_tool === undefined ? false : window.is_declarative_tool;
+
+const urlParams = new URLSearchParams(window.location.search);
+window.is_declarative_tool = urlParams.get('declarative') === 'true';
 
 // Update model context based on current page
 function updateModelContext() {

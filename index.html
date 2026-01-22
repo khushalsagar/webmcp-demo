@@ -3,9 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flight Booking</title>
+    <title id="pageTitle">Flight Booking</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✈️</text></svg>">
     <link rel="stylesheet" href="styles.css">
+    <script>
+        const isDeclarative = new URLSearchParams(window.location.search).get('declarative') === 'true';
+        document.addEventListener('DOMContentLoaded', () => {
+            const subHeading = document.getElementById('subHeading');
+            const flightForm = document.getElementById('flightForm');
+            if (isDeclarative) {
+                document.getElementById('pageTitle').textContent = 'Flight Booking (Declarative Form Version)';
+                document.getElementById('mainHeading').textContent = '✈️ Book Your Flight (Declarative Version)';
+                subHeading.innerHTML = 'Find the best flights for your journey <a href="index.html">(imperative version)</a>';
+            } else {
+                subHeading.innerHTML = 'Find the best flights for your journey <a href="index.html?declarative=true">(declarative version)</a>';
+                flightForm.removeAttribute('toolname');
+                flightForm.removeAttribute('tooldescription');
+            }
+        });
+    </script>
     <script src="script.js" defer></script>
 </head>
 <body>
@@ -25,23 +41,26 @@
             </div>
         </div>
         
-        <h1>✈️ Book Your Flight</h1>
-        <p class="subtitle">Find the best flights for your journey</p>
+        <h1 id="mainHeading">✈️ Book Your Flight</h1>
+        <p class="subtitle" id="subHeading">Find the best flights for your journey</p>
 
-        <form id="flightForm">
+        <form id="flightForm" toolname="search_flights"
+                tooldescription="Search for available flights between cities. Returns detailed
+                flight information including airline, price, times, stops, duration, aircraft type,
+                amenities, and seat details.">
             <div class="form-group">
                 <label for="origin">Origin City</label>
-                <input type="text" id="origin" placeholder="e.g., New York" required>
+                <input type="text" id="origin" name="origin" placeholder="e.g., New York" required>
             </div>
 
             <div class="form-group">
                 <label for="destination">Destination City</label>
-                <input type="text" id="destination" placeholder="e.g., Los Angeles" required>
+                <input type="text" id="destination" name="destination" placeholder="e.g., Los Angeles" required>
             </div>
 
             <div class="form-group">
                 <label for="departureDate">Departure Date</label>
-                <input type="date" id="departureDate" required>
+                <input type="date" id="departureDate" name="departureDate" required>
             </div>
 
             <div class="checkbox-group">
@@ -51,12 +70,12 @@
 
             <div class="form-group" id="returnDateGroup">
                 <label for="returnDate">Return Date</label>
-                <input type="date" id="returnDate">
+                <input type="date" id="returnDate" name="returnDate">
             </div>
 
             <div class="form-group">
                 <label for="passengers">Number of Passengers</label>
-                <select id="passengers" required>
+                <select id="passengers" name="passengers" required>
                     <option value="1">1 Passenger</option>
                     <option value="2">2 Passengers</option>
                     <option value="3">3 Passengers</option>

@@ -92,6 +92,16 @@ h1 {
     font-size: 16px;
 }
 
+.subtitle a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.subtitle a:hover {
+    text-decoration: underline;
+}
+
 .form-group {
     margin-bottom: 20px;
 }
