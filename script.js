@@ -547,55 +547,44 @@ document.getElementById('backButton').addEventListener('click', () => {
 });
 
 // Handle form submission
-if (!is_declarative_tool) {
-    document.getElementById('flightForm').addEventListener('submit', function(e) {
-        e.preventDefault();
+document.getElementById('flightForm').addEventListener('submit', function(e) {
+    // Determine if we should use SPA submission
+    // Imperative mode: always yes (is_declarative_tool is false)
+    // Declarative mode: only if checkbox is checked
+    const useSpa = !is_declarative_tool || document.getElementById('spaSubmission').checked;
+    
+    if (!useSpa) return;
 
-        searchData = {
-            origin: document.getElementById('origin').value,
-            destination: document.getElementById('destination').value,
-            departureDate: document.getElementById('departureDate').value,
-            oneWay: document.getElementById('oneWay').checked,
-            returnDate: document.getElementById('oneWay').checked ? null : document.getElementById('returnDate').value,
-            passengers: document.getElementById('passengers').value
-        };
+    e.preventDefault();
 
-        // Generate flights
-        allFlights = generateFlights(searchData.origin, searchData.destination);
-        filteredFlights = [...allFlights];
-        currentPage = 0;
+    const origin = document.getElementById('origin').value;
+    const destination = document.getElementById('destination').value;
+    const departureDate = document.getElementById('departureDate').value;
+    const returnDate = document.getElementById('returnDate').value;
+    const passengers = document.getElementById('passengers').value;
+    const oneWay = document.getElementById('oneWay').checked;
 
-        const dateOptions = { 
-            weekday: 'long', 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric', 
-            timeZone: 'UTC' 
-        };
+    const args = {
+        origin,
+        destination,
+        departureDate,
+        passengers: parseInt(passengers),
+        returnDate: oneWay ? undefined : returnDate
+    };
 
-        // Update summary
-        const summaryHtml = `
-            <h2>${searchData.origin} → ${searchData.destination}</h2>
-            <p>${new Date(searchData.departureDate).toLocaleDateString('en-US', dateOptions)}
-            ${searchData.returnDate ? ' - ' + new Date(searchData.returnDate).toLocaleDateString('en-US', dateOptions) : ' (One-way)'}
-            • ${searchData.passengers} passenger${searchData.passengers > 1 ? 's' : ''}</p>
-        `;
-        document.getElementById('searchSummary').innerHTML = summaryHtml;
-        document.getElementById('resultsCount').textContent = `${allFlights.length} flights found`;
-
-        // Show results page
-        document.getElementById('searchPage').classList.add('hidden');
-        document.getElementById('resultsPage').classList.remove('hidden');
-        
+    const promise = window.searchFlights(args).then(json => {
         history.pushState({ page: 'results' }, '', '#results');
-
-        renderFlights();
-        updateModelContext(); // Ensure context updates when manually submitting form too
+        return json;
     });
-}
+
+    if (is_declarative_tool && e.respondWith) {
+        e.respondWith(promise);
+    }
+});
 
 window.addEventListener('popstate', (event) => {
-    if (!is_declarative_tool) {
+    const useSpa = !is_declarative_tool || document.getElementById('spaSubmission').checked;
+    if (useSpa) {
         if (event.state && event.state.page === 'results') {
              document.getElementById('searchPage').classList.add('hidden');
              document.getElementById('resultsPage').classList.remove('hidden');

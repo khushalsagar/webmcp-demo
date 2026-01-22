@@ -15,6 +15,14 @@
                 document.getElementById('pageTitle').textContent = 'Flight Booking (Declarative Form Version)';
                 document.getElementById('mainHeading').textContent = '✈️ Book Your Flight (Declarative Version)';
                 subHeading.innerHTML = 'Find the best flights for your journey <a href="index.html">(imperative version)</a>';
+                document.getElementById('spaSubmissionContainer').style.display = 'block';
+                
+                // Add hidden input to preserve declarative mode on form submit
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'declarative';
+                hiddenInput.value = 'true';
+                flightForm.appendChild(hiddenInput);
             } else {
                 subHeading.innerHTML = 'Find the best flights for your journey <a href="index.html?declarative=true">(declarative version)</a>';
                 flightForm.removeAttribute('toolname');
@@ -37,6 +45,10 @@
                 <div class="settings-checkbox">
                     <input type="checkbox" id="toolBugWorkaround" checked>
                     <label for="toolBugWorkaround">Tool declaration bug workaround</label>
+                </div>
+                <div class="settings-checkbox" id="spaSubmissionContainer" style="display: none;">
+                    <input type="checkbox" id="spaSubmission">
+                    <label for="spaSubmission">Use SPA form submission</label>
                 </div>
             </div>
         </div>
