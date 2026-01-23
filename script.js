@@ -218,9 +218,7 @@ window.searchFlights = searchFlights;
 window.getFlights = getFlights;
 window.showFlights = showFlights;
 window.resetFilters = resetFilters;
-
-const urlParams = new URLSearchParams(window.location.search);
-window.is_declarative_tool = urlParams.get('declarative') === 'true';
+window.is_declarative_tool = window.is_declarative_tool === undefined ? false : window.is_declarative_tool;
 
 // Update model context based on current page
 function updateModelContext() {
@@ -547,44 +545,55 @@ document.getElementById('backButton').addEventListener('click', () => {
 });
 
 // Handle form submission
-document.getElementById('flightForm').addEventListener('submit', function(e) {
-    // Determine if we should use SPA submission
-    // Imperative mode: always yes (is_declarative_tool is false)
-    // Declarative mode: only if checkbox is checked
-    const useSpa = !is_declarative_tool || document.getElementById('spaSubmission').checked;
-    
-    if (!useSpa) return;
+if (!is_declarative_tool) {
+    document.getElementById('flightForm').addEventListener('submit', function(e) {
+        e.preventDefault();
 
-    e.preventDefault();
+        searchData = {
+            origin: document.getElementById('origin').value,
+            destination: document.getElementById('destination').value,
+            departureDate: document.getElementById('departureDate').value,
+            oneWay: document.getElementById('oneWay').checked,
+            returnDate: document.getElementById('oneWay').checked ? null : document.getElementById('returnDate').value,
+            passengers: document.getElementById('passengers').value
+        };
 
-    const origin = document.getElementById('origin').value;
-    const destination = document.getElementById('destination').value;
-    const departureDate = document.getElementById('departureDate').value;
-    const returnDate = document.getElementById('returnDate').value;
-    const passengers = document.getElementById('passengers').value;
-    const oneWay = document.getElementById('oneWay').checked;
+        // Generate flights
+        allFlights = generateFlights(searchData.origin, searchData.destination);
+        filteredFlights = [...allFlights];
+        currentPage = 0;
 
-    const args = {
-        origin,
-        destination,
-        departureDate,
-        passengers: parseInt(passengers),
-        returnDate: oneWay ? undefined : returnDate
-    };
+        const dateOptions = { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric', 
+            timeZone: 'UTC' 
+        };
 
-    const promise = window.searchFlights(args).then(json => {
+        // Update summary
+        const summaryHtml = `
+            <h2>${searchData.origin} → ${searchData.destination}</h2>
+            <p>${new Date(searchData.departureDate).toLocaleDateString('en-US', dateOptions)}
+            ${searchData.returnDate ? ' - ' + new Date(searchData.returnDate).toLocaleDateString('en-US', dateOptions) : ' (One-way)'}
+            • ${searchData.passengers} passenger${searchData.passengers > 1 ? 's' : ''}</p>
+        `;
+        document.getElementById('searchSummary').innerHTML = summaryHtml;
+        document.getElementById('resultsCount').textContent = `${allFlights.length} flights found`;
+
+        // Show results page
+        document.getElementById('searchPage').classList.add('hidden');
+        document.getElementById('resultsPage').classList.remove('hidden');
+        
         history.pushState({ page: 'results' }, '', '#results');
-        return json;
-    });
 
-    if (is_declarative_tool && e.respondWith) {
-        e.respondWith(promise);
-    }
-});
+        renderFlights();
+        updateModelContext(); // Ensure context updates when manually submitting form too
+    });
+}
 
 window.addEventListener('popstate', (event) => {
-    const useSpa = !is_declarative_tool || document.getElementById('spaSubmission').checked;
-    if (useSpa) {
+    if (!is_declarative_tool) {
         if (event.state && event.state.page === 'results') {
              document.getElementById('searchPage').classList.add('hidden');
              document.getElementById('resultsPage').classList.remove('hidden');
