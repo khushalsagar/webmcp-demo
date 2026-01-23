@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flight Booking (Minimal, declarative)</title>
+
+<div class="container">
+    <div class="settings">
+        <div class="checkbox-wrapper">
+            <input type="checkbox" id="spaMode">
+            <label for="spaMode">Use SPA form submission</label>
+        </div>
+    </div>
+    
+    <h1>✈️ Book Flight</h1>
+
+    <form id="flightForm" toolname="search_flights"
+            tooldescription="Search for available flights.">
+        
+        <div class="form-group">
+            <label for="origin">Origin City</label>
+            <input type="text" id="origin" name="origin" placeholder="e.g., New York" required>
+        </div>
+
+        <!-- Destination removed as requested -->
+
+        <div class="form-group">
+            <label for="departureDate">Departure Date</label>
+            <input type="date" id="departureDate" name="departureDate" value="2026-08-16" required>
+        </div>
+
+        <!-- One-way removed as requested -->
+        <!-- Return Date removed as requested -->
+
+        <div class="form-group">
+            <label for="passengers">Number of Passengers</label>
+            <select id="passengers" name="passengers" required>
+                <option value="1">1 Passenger</option>
+                <option value="2">2 Passengers</option>
+            </select>
+        </div>
+
+        <button type="submit">Search Flights</button>
+    </form>
+</div>
+
+<script>
+const HARDCODED_RESULTS = JSON.stringify({
+    totalFlights: 2,
+    flights: [
+        {
+            flightId: "FL-MIN-01",
+            airline: "Minimal Air",
+            price: 120,
+            departure: { time: "09:00", airport: "ABC" },
+            arrival: { time: "11:00", airport: "XYZ" },
+            duration: "2h 00m"
+        },
+        {
+            flightId: "FL-MIN-02",
+            airline: "Tiny Jets",
+            price: 95,
+            departure: { time: "15:30", airport: "ABC" },
+            arrival: { time: "18:00", airport: "XYZ" },
+            duration: "2h 30m"
+        }
+    ]
+});
+
+window.searchFlights = async function(params) {
+    console.log("Searching with params (ignored):", params);
+    return HARDCODED_RESULTS;
+};
+
+window.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('flightForm');
+    const spaCheckbox = document.getElementById('spaMode');
+
+    if (spaCheckbox) {
+        form.addEventListener('submit', (e) => {
+            if (!spaCheckbox.checked) {
+                return;
+            }
+            e.preventDefault();
+
+            const formData = new FormData(form);
+            const searchParams = {
+                origin: formData.get('origin'),
+                departureDate: formData.get('departureDate'),
+                passengers: parseInt(formData.get('passengers'))
+            };
+
+            const promise = window.searchFlights(searchParams);
+
+            if (typeof e.respondWith === 'function') {
+                console.log("Calling respondWith");
+                e.respondWith(promise);
+            } else {
+                console.log("Browser does not support e.respondWith, displaying alert.");
+                promise.then(res => alert(res));
+            }
+        });
+    }
+});
+</script>
+
+<style>
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    margin: 0;
+}
+
+.container {
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    max-width: 500px;
+    width: 100%;
+}
+
+h1 {
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 28px;
+    text-align: center;
+}
+
+.settings {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    color: #333;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+input, select {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 16px;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+input:focus, select:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+button {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+button:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.checkbox-wrapper {
+    display: flex;
+    align-items: center;
+}
+
+.checkbox-wrapper input {
+    width: auto;
+    margin-right: 10px;
+}
+
+.checkbox-wrapper label {
+    margin-bottom: 0;
+    cursor: pointer;
+}
+</style>
