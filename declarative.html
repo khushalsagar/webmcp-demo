@@ -23,6 +23,10 @@
                     <input type="checkbox" id="toolBugWorkaround" checked>
                     <label for="toolBugWorkaround">Tool declaration bug workaround</label>
                 </div>
+                <div class="settings-checkbox">
+                    <input type="checkbox" id="spaMode">
+                    <label for="spaMode">Use SPA form submission</label>
+                </div>
             </div>
         </div>
         
@@ -92,5 +96,38 @@
             <button id="nextButton">Next</button>
         </div>
     </div>
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('flightForm');
+            const spaCheckbox = document.getElementById('spaMode');
+
+            if (form && spaCheckbox) {
+                form.addEventListener('submit', (e) => {
+                    if (spaCheckbox.checked) {
+                        e.preventDefault();
+
+                        const formData = new FormData(form);
+                        const searchParams = {
+                            origin: formData.get('origin'),
+                            destination: formData.get('destination'),
+                            departureDate: formData.get('departureDate'),
+                            returnDate: formData.get('returnDate'),
+                            passengers: parseInt(formData.get('passengers'))
+                        };
+
+                        if (!searchParams.returnDate) {
+                            searchParams.returnDate = undefined;
+                        }
+
+                        const promise = window.searchFlights(searchParams);
+
+                        if (typeof e.respondWith === 'function') {
+                            e.respondWith(promise);
+                        }
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html>
